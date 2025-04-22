@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { TodoType } from "@/app/data/store";
+import { useEffect, useRef } from "react";
 
 const getColor = (color: number) => {
     color = color % 3;
@@ -18,28 +19,37 @@ const getColor = (color: number) => {
 };
 
 type TodoCardProps = {
-    item: string;
+    item: TodoType;
     index: number;
     onToggle: () => void;
 }
 export function TodoCard({item, index, onToggle}: TodoCardProps) {
+    const color = getColor(index);
+
     const todoListCardRef = useRef<HTMLInputElement>(null);
     const todoListCardClick = () => {
         onToggle();
-        
+
         if (todoListCardRef.current) {
             todoListCardRef.current.checked = !todoListCardRef.current.checked;
         }
     };
 
-    const color = getColor(index);
+    useEffect(() => {
+        if (todoListCardRef.current) {
+            todoListCardRef.current.checked = false;
+        }
+    }, [item]);
 
     return (
         <div onClick={todoListCardClick} className={`flex gap-4 w-[calc(50%-0.5rem)] px-4 py-6 ${color} rounded-lg shadow-md duration-200`}>
-            <input ref={todoListCardRef} type="checkbox" />
+            <input ref={todoListCardRef} type="checkbox" onClick={(e) => {
+                e.stopPropagation();
+                onToggle();
+            }} />
 
             <div>
-                {item}
+                {item.content}
             </div>
         </div>
     );

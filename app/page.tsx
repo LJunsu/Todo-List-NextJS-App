@@ -14,7 +14,7 @@ export default async function Home() {
 
         <TodoInputForm />
 
-        {todoList && <TodoList list={todoList} />}
+        <TodoList list={todoList} />
       </div>
     </div>
   );
