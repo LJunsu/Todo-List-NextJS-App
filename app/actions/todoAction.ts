@@ -2,7 +2,6 @@
 
 import { z } from "zod";
 import { addItem } from "../data/store";
-import { revalidatePath } from "next/cache";
 
 const todoSchema = z.object({
     todoContent: z
@@ -25,7 +24,5 @@ export async function todoAction(_: unknown, formData: FormData) {
         return result.error.flatten();
     } else {
         await addItem(result.data.todoContent);
-
-        revalidatePath("/");
     }
 }

@@ -42,14 +42,15 @@ export function TodoCard({item, index, onToggle}: TodoCardProps) {
     }, [item]);
 
     return (
-        <div onClick={todoListCardClick} className={`flex gap-4 w-[calc(50%-0.5rem)] px-4 py-6 ${color} rounded-lg shadow-md duration-200`}>
+        <div onClick={todoListCardClick} className={`flex gap-4 w-[calc(50%-0.5rem)] px-4 py-6 ${color} rounded-lg shadow-md cursor-pointer`}>
             <input ref={todoListCardRef} type="checkbox" onClick={(e) => {
                 e.stopPropagation();
                 onToggle();
             }} />
 
-            <div>
-                {item.content}
+            <div className="flex justify-between w-full">
+                <div>{item.content}</div>
+                {item.completed && <div>✔</div>}
             </div>
         </div>
     );
