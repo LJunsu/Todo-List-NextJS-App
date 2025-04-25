@@ -7,22 +7,45 @@ import { TodoType } from "@/app/data/store";
 import { todoCompletedAction } from "@/app/actions/todoCompletedAction";
 import { getTodo } from "@/app/actions/getTodo";
 import { useTodoStore } from "@/store/todoStore";
+import { Pagination } from "./Pagination";
 
 export function TodoList() {
+    const limit = 4;
     const {refreshKey} = useTodoStore();
     const [list, setList] = useState<TodoType[]>([]);
-    const [category, setCategory] = useState<string>("all");
+    const [nowList, setNowList] = useState<TodoType[]>([]);
+    const [page, setPage] = useState<number>(1);
+    const handlePageChange = (page: number) => {
+        setPage(page);
 
+        let start = (page - 1) * limit;
+        let end = page * limit;
+
+        if (list.length > 0) {
+            if (category == "all") {
+                setNowList(list.slice(start, end));
+            } else if (category == "Active") {
+                setNowList(list.filter(item => !item.completed).slice(start, end));
+            } else if (category == "completed") {
+                setNowList(list.filter(item => item.completed).slice(start, end));
+            }
+        }
+    };
+    
+    const [category, setCategory] = useState<string>("all");
     async function categoryChange() {
+        setPage(1);
         getTodo(category).then((items) => {
             setList(items);
         });
     }
     useEffect(() => {
         categoryChange();
+        setPage(1);
     }, [category, refreshKey]);
     useEffect(() => {
         setCheckedList([]);
+        setNowList(list.slice(0, limit));
     }, [list]);
 
     const [checkedList, setCheckedList] = useState<number[]>([]);
@@ -79,8 +102,15 @@ export function TodoList() {
             </div>
 
             <div className="flex flex-wrap gap-4 w-full">
-                {list.length > 0 ? list.map((item, index) => <TodoCard key={index} item={item} index={index} onToggle={() => checkTodo(item.id)} />) : <div>There is no todo.</div>}
+                {nowList.length > 0 ? nowList.map((item, index) => <TodoCard key={index} item={item} index={index} onToggle={() => checkTodo(item.id)} />) : <div>There is no todo.</div>}
             </div>
+
+            <Pagination
+                totalPage={Math.ceil(list.length / limit)}
+                limit={limit}
+                page={page}
+                setPage={handlePageChange}
+            />
         </div>
     );
 }

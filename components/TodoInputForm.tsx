@@ -14,11 +14,6 @@ export function TodoInputForm() {
 
     return (
         <form action={action} className="flex justify-between items-center gap-4 w-full">
-            /* 폼 제출 상태(pending)를 감지하기 위한 컴포넌트 */
-            /* 
-                useFormStatus Hook이 작동하려면 Form 컴포넌트와 그 하위 요소에서 상태 변화를 감지해야 하므로, 
-                AfterSubmitEffect를 Form 안에 넣어서 상태를 감지하고 처리할 수 있도록 했음
-            */
             <AfterSubmitEffect /> 
 
             <div className="flex flex-col gap-2 w-5/6">
