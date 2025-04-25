@@ -1,5 +1,6 @@
 import { TodoInputForm } from "@/components/TodoInputForm";
 import { TodoList } from "@/components/TodoList";
+import { Suspense } from "react";
 
 export default async function Home() {
 
@@ -12,7 +13,9 @@ export default async function Home() {
 
         <TodoInputForm />
 
-        <TodoList />
+        <Suspense fallback={<div>로딩 중...</div>}>
+          <TodoList />
+        </Suspense>
       </div>
     </div>
   );
