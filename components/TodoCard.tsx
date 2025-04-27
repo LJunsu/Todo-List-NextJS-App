@@ -19,11 +19,13 @@ const getColor = (color: number) => {
 };
 
 type TodoCardProps = {
+    ref: HTMLDivElement;
+    dragStart: (e: DragEvent, id: number) => void;
     item: TodoType;
     index: number;
     onToggle: () => void;
 }
-export function TodoCard({item, index, onToggle}: TodoCardProps) {
+export function TodoCard({ref, dragStart, item, index, onToggle}: TodoCardProps) {
     const color = getColor(index);
 
     const todoListCardRef = useRef<HTMLInputElement>(null);
@@ -42,7 +44,13 @@ export function TodoCard({item, index, onToggle}: TodoCardProps) {
     }, [item]);
 
     return (
-        <div onClick={todoListCardClick} className={`flex gap-4 w-[calc(50%-0.5rem)] px-4 py-6 ${color} rounded-lg shadow-md cursor-pointer`}>
+        <div 
+            ref={ref}
+            onDragStart={(e) => dragStart(e, item.id)}
+            className={`flex gap-4 w-[calc(50%-0.5rem)] px-4 py-6 ${color} rounded-lg shadow-md cursor-pointer`}
+            onClick={todoListCardClick} 
+            draggable
+        >
             <input ref={todoListCardRef} type="checkbox" onClick={(e) => {
                 e.stopPropagation();
                 onToggle();

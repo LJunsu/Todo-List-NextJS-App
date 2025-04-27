@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TodoCard } from "./TodoCard";
 import { todoDeleteAction } from "@/app/actions/todoDeleteAction";
 import { TodoType } from "@/app/data/store";
@@ -12,8 +12,15 @@ import { Pagination } from "./Pagination";
 export function TodoList() {
     const limit = 4;
     const {refreshKey} = useTodoStore();
+
     const [list, setList] = useState<TodoType[]>([]);
+    useEffect(() => {
+        setCheckedList([]);
+        setNowList(list.slice(0, limit));
+    }, [list]);
+
     const [nowList, setNowList] = useState<TodoType[]>([]);
+    
     const [page, setPage] = useState<number>(1);
     const handlePageChange = (page: number) => {
         setPage(page);
@@ -43,10 +50,6 @@ export function TodoList() {
         categoryChange();
         setPage(1);
     }, [category, refreshKey]);
-    useEffect(() => {
-        setCheckedList([]);
-        setNowList(list.slice(0, limit));
-    }, [list]);
 
     const [checkedList, setCheckedList] = useState<number[]>([]);
     const checkTodo = (id: number) => {
@@ -71,10 +74,22 @@ export function TodoList() {
         categoryChange();
     }
 
+    const dragItem = useRef<HTMLDivElement[] | null[]>(new Array(list.length));
+    const dragOverItem = useRef<HTMLLIElement[] | null[]>(new Array(3));
+    const dragStart = (e: any, idx: number) => {
+        console.log(idx);
+        console.log(e.target);
+    }
+    console.log(dragItem);
+    console.log(dragOverItem);
+
     return (
         <div className="flex flex-col gap-4 w-full">
             <ul className="flex justify-around pb-4 border-b-1 border-[#e2e2e2] *:cursor-pointer">
                 <li 
+                    ref={(el: HTMLLIElement) => {
+                        dragOverItem.current[0] = el;
+                    }}
                     className={`${category == "all" && "selected"}`}
                     onClick={() => setCategory("all")}
                 >
@@ -82,6 +97,9 @@ export function TodoList() {
                 </li>
 
                 <li 
+                    ref={(el: HTMLLIElement) => {
+                        dragOverItem.current[1] = el;
+                    }}
                     className={`${category == "Active" && "selected"}`}
                     onClick={() => setCategory("Active")}
                 >
@@ -89,6 +107,9 @@ export function TodoList() {
                 </li>
 
                 <li
+                    ref={(el: HTMLLIElement) => {
+                        dragOverItem.current[2] = el;
+                    }}
                     className={`${category == "completed" && "selected"}`}
                     onClick={() => setCategory("completed")}
                 >
@@ -102,7 +123,9 @@ export function TodoList() {
             </div>
 
             <div className="flex flex-wrap gap-4 w-full">
-                {nowList.length > 0 ? nowList.map((item, index) => <TodoCard key={index} item={item} index={index} onToggle={() => checkTodo(item.id)} />) : <div>There is no todo.</div>}
+                {nowList.length > 0 ? nowList.map((item, index) => <TodoCard key={index} ref={(el: HTMLDivElement) => {
+                    dragItem.current[index] = el;
+                }} dragStart={dragStart} item={item} index={index} onToggle={() => checkTodo(item.id)} />) : <div>There is no todo.</div>}
             </div>
 
             <Pagination
