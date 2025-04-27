@@ -8,6 +8,8 @@ import { todoCompletedAction } from "@/app/actions/todoCompletedAction";
 import { getTodo } from "@/app/actions/getTodo";
 import { useTodoStore } from "@/store/todoStore";
 import { Pagination } from "./Pagination";
+import { todoToActiveAction } from "@/app/actions/todoToActiveAction";
+import { todoToCompletedAction } from "@/app/actions/todoToCompletedAction";
 
 export function TodoList() {
     const limit = 4;
@@ -76,12 +78,30 @@ export function TodoList() {
 
     const dragItem = useRef<HTMLDivElement[] | null[]>(new Array(list.length));
     const dragOverItem = useRef<HTMLLIElement[] | null[]>(new Array(3));
+
+    let selectedItem = -1;
+    let selectedCategory = -1;
+    
     const dragStart = (e: any, idx: number) => {
-        console.log(idx);
-        console.log(e.target);
+        selectedItem = idx;
     }
-    console.log(dragItem);
-    console.log(dragOverItem);
+    const dragEnter = (e: any, idx: number) => {
+        selectedCategory = idx;
+    };
+    const dragLeave = (e: any) => {
+        selectedCategory = -1;
+    };
+    const dragEnd = async (e: React.DragEvent<HTMLLIElement>) => {
+        e.preventDefault();
+        console.log(selectedItem, selectedCategory);
+        if(selectedItem > -1 && selectedCategory > -1) {
+            if(selectedCategory === 1) await todoToActiveAction([Number(selectedItem)]);
+            else if(selectedCategory === 2) await todoToCompletedAction([Number(selectedItem)]);
+        }
+        selectedItem = -1;
+        selectedCategory = -1;
+        categoryChange();
+    }
 
     return (
         <div className="flex flex-col gap-4 w-full">
@@ -90,6 +110,8 @@ export function TodoList() {
                     ref={(el: HTMLLIElement) => {
                         dragOverItem.current[0] = el;
                     }}
+                    onDragEnter={(e) => dragEnter(e, 0)}
+                    onDragLeave={(e) => dragLeave(e)}
                     className={`${category == "all" && "selected"}`}
                     onClick={() => setCategory("all")}
                 >
@@ -100,6 +122,8 @@ export function TodoList() {
                     ref={(el: HTMLLIElement) => {
                         dragOverItem.current[1] = el;
                     }}
+                    onDragEnter={(e) => dragEnter(e, 1)}
+                    onDragLeave={(e) => dragLeave(e)}
                     className={`${category == "Active" && "selected"}`}
                     onClick={() => setCategory("Active")}
                 >
@@ -110,6 +134,8 @@ export function TodoList() {
                     ref={(el: HTMLLIElement) => {
                         dragOverItem.current[2] = el;
                     }}
+                    onDragEnter={(e) => dragEnter(e, 2)}
+                    onDragLeave={(e) => dragLeave(e)}
                     className={`${category == "completed" && "selected"}`}
                     onClick={() => setCategory("completed")}
                 >
@@ -125,7 +151,7 @@ export function TodoList() {
             <div className="flex flex-wrap gap-4 w-full">
                 {nowList.length > 0 ? nowList.map((item, index) => <TodoCard key={index} ref={(el: HTMLDivElement) => {
                     dragItem.current[index] = el;
-                }} dragStart={dragStart} item={item} index={index} onToggle={() => checkTodo(item.id)} />) : <div>There is no todo.</div>}
+                }} dragStart={dragStart} dragEnd={dragEnd} item={item} index={index} onToggle={() => checkTodo(item.id)} />) : <div>There is no todo.</div>}
             </div>
 
             <Pagination

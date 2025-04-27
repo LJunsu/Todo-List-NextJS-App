@@ -70,3 +70,21 @@ export async function removeItem(indexs: number[]): Promise<void> {
     const newItems = items.filter((item) => !indexs.includes(item.id)); // items 배열에서 indexs 배열에 없는 id를 가진 todo만 반환 = indexs 배열에 있는 값을 제외한 나머지 값
     await fs.writeFile(dbPath, JSON.stringify(newItems, null, 2));
 }
+
+export async function toActiveItem(indexs: number[]): Promise<void> {
+    const items = await getItems();
+    indexs.map((id) => {
+        let newIndex = items.find(item => item.id === id);
+        if(newIndex) newIndex.completed = false;
+    });
+    await fs.writeFile(dbPath, JSON.stringify(items, null, 2));
+}
+
+export async function toCompletedItem(indexs: number[]): Promise<void> {
+    const items = await getItems();
+    indexs.map((id) => {
+        let newIndex = items.find(item => item.id === id);
+        if(newIndex) newIndex.completed = true;
+    });
+    await fs.writeFile(dbPath, JSON.stringify(items, null, 2));
+}

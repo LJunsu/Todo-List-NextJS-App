@@ -20,12 +20,13 @@ const getColor = (color: number) => {
 
 type TodoCardProps = {
     ref: HTMLDivElement;
-    dragStart: (e: DragEvent, id: number) => void;
+    dragStart: (e:DragEvent, id: number) => void;
+    dragEnd: (e: DragEvent) => void;
     item: TodoType;
     index: number;
     onToggle: () => void;
 }
-export function TodoCard({ref, dragStart, item, index, onToggle}: TodoCardProps) {
+export function TodoCard({ref, dragStart, dragEnd, item, index, onToggle}: TodoCardProps) {
     const color = getColor(index);
 
     const todoListCardRef = useRef<HTMLInputElement>(null);
@@ -46,7 +47,9 @@ export function TodoCard({ref, dragStart, item, index, onToggle}: TodoCardProps)
     return (
         <div 
             ref={ref}
-            onDragStart={(e) => dragStart(e, item.id)}
+            data-id={item.id}
+            onDragStart={(e: React.DragEvent<HTMLDivElement>) => dragStart(e, item.id)}
+            onDragEnd={(e: React.DragEvent<HTMLDivElement>) => dragEnd(e)}
             className={`flex gap-4 w-[calc(50%-0.5rem)] px-4 py-6 ${color} rounded-lg shadow-md cursor-pointer`}
             onClick={todoListCardClick} 
             draggable
