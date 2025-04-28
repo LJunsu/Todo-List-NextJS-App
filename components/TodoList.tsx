@@ -10,6 +10,7 @@ import { useTodoStore } from "@/store/todoStore";
 import { Pagination } from "./Pagination";
 import { todoToActiveAction } from "@/app/actions/todoToActiveAction";
 import { todoToCompletedAction } from "@/app/actions/todoToCompletedAction";
+import { useDragStore } from "@/store/dragStore";
 
 export function TodoList() {
     const limit = 4; // 페이지네이션에서 한 페이지에 표시할 데이터의 갯수와 페이지네이션의 PageArray 크기
@@ -87,16 +88,29 @@ export function TodoList() {
         categoryChange();
     }
 
+    const {setDragOn, setDragOff} = useDragStore();
     const dragItem = useRef<HTMLDivElement[] | null[]>(new Array(list.length));
     const dragOverItem = useRef<HTMLLIElement[] | null[]>(new Array(3));
 
-    let selectedItem = -1;
-    let selectedCategory = -1;
+    /*
+        zustand를 사용해 드래그 상태를 관리하고자 했으나, 
+        useState와 zustand는 값이 변하면 컴포넌트가 리렌더링 되기 때문에
+        let 변수는 컴포넌트가 리렌더링 될 때 마다 초기화되는 지역변수이므로
+        드래그처럼 빠르게 바뀌는 값은 리렌더링 없이 즉시 읽고 사용할 수 있도록 해야 한다.
+        useRef는 값이 변해도 리렌더링이 일어나지 않고 메모리에 값이 유지되는 특징이 있다.
+        따라서 드래그 상태를 관리하기 위해 useRef를 사용하였다.
+    */
+    // let selectedItem = -1;
+    // let selectedCategory = -1;
+    const selectedItem = useRef<number>(-1);
+    const selectedCategory = useRef<number>(-1);
     
     // todo(div 태그)가 드래그를 시작할 때 호출되는 함수
     const dragStart = (e: React.DragEvent<HTMLDivElement>, idx: number) => {
-        selectedItem = idx; // selectedItem에 현재 드래그 중인 todo의 id를 저장
+        setDragOn();
+        selectedItem.current = idx; // selectedItem에 현재 드래그 중인 todo의 id를 저장
     }
+
     /*
         기존 dragEnter(TodoCard 컴포넌트)로 진행 시, 
         Drop보다 Leave가 먼저 수행되는 타이밍 이슈로 인해 
@@ -107,36 +121,41 @@ export function TodoList() {
         e.preventDefault();
 
         // 드래그된 항목의 카테고리의 인덱스를 저장
-        selectedCategory = idx; 
+        selectedCategory.current = idx; 
     };
+
     // 드래그 중인 todo(div 태그)가 카테고리(li 태그)를 벗어날 때 호출되는 함수
     const dragLeave = (e: React.DragEvent<HTMLLIElement>) => {
         e.preventDefault();
 
         // 드래그 중인 항목이 카테고리를 벗어나 선택된 카테고리가 없음을 의미하는 -1로 초기화
-        selectedCategory = -1;
+        selectedCategory.current = -1;
     };
+
     // 드래그된 항목이 드랍될 때 호출되는 함수
     const dragDrop = async (e: any) => {
         e.preventDefault();
 
         // selectedItem과 selectedCategory가 유효한 값일 경우
         // 유효한 값 = todo를 드래그한 상태로 특정 카테고리 위에 드랍 시
-        if(selectedItem > -1 && selectedCategory > -1) {
-            if(selectedCategory === 1) await todoToActiveAction([Number(selectedItem)]); // 드랍한 카테고리가 Active(1)라면 해당 todo의 completed 속성을 false로 변경
-            else if(selectedCategory === 2) await todoToCompletedAction([Number(selectedItem)]); // 드랍한 카테고리가 Completed(2)라면 해당 todo의 completed 속성을 true로 변경 
+        console.log(selectedItem.current, selectedCategory.current);
+        if(selectedItem.current > -1 && selectedCategory.current > -1) {
+            if(selectedCategory.current === 1) await todoToActiveAction([Number(selectedItem.current)]); // 드랍한 카테고리가 Active(1)라면 해당 todo의 completed 속성을 false로 변경
+            else if(selectedCategory.current === 2) await todoToCompletedAction([Number(selectedItem.current)]); // 드랍한 카테고리가 Completed(2)라면 해당 todo의 completed 속성을 true로 변경 
             categoryChange(); // todo의 completed를 변경한 후 수정된 list를 다시 받아오기 위한 함수
         }
     }
+
     // 드래그가 끝났을 때 호출되는 함수
     const dragEnd = async (e: React.DragEvent<HTMLDivElement>) => {        
-        selectedItem = -1; // todo(div 태그)에 대한 값을 초기화
-        selectedCategory = -1; // 카테고리(li 태그)에 대한 값을 초기화
+        selectedItem.current = -1; // todo(div 태그)에 대한 값을 초기화
+        selectedCategory.current = -1; // 카테고리(li 태그)에 대한 값을 초기화
+        setDragOff();
     }
 
     return (
         <div className="flex flex-col gap-4 w-full">
-            <ul className="flex justify-around pb-4 border-b-1 border-[#e2e2e2] *:cursor-pointer">
+            <ul className={`flex justify-around pb-4 border-b-1 border-[#e2e2e2] *:cursor-pointer relative z-50 bg-white py-4 rounded-lg shadow-lg`}>
                 <li 
                     ref={(el: HTMLLIElement) => {
                         dragOverItem.current[0] = el;
@@ -182,7 +201,7 @@ export function TodoList() {
                 <button onClick={deleteTodo} className="w-1/2 h-12 bg-[#ff4e4e] text-white rounded-lg cursor-pointer duration-200 hover:bg-[#dd3636]">Delete</button>
             </div>
 
-            <div className="flex flex-wrap gap-4 w-full">
+            <div className="flex flex-wrap gap-4 w-full *:z-50">
                 {nowList.length > 0 ? nowList.map((item, index) => <TodoCard key={index} ref={(el: HTMLDivElement) => {
                     dragItem.current[index] = el;
                 }} dragStart={dragStart} dragEnd={dragEnd} item={item} index={index} onToggle={() => checkTodo(item.id)} />) : <div>There is no todo.</div>}
