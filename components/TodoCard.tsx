@@ -20,7 +20,7 @@ const getColor = (color: number) => {
 
 type TodoCardProps = {
     dragStart: (id: number) => void;
-    dragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
+    dragEnd: () => void;
     item: TodoType;
     index: number;
     onToggle: () => void;
@@ -65,7 +65,7 @@ const TodoCard = forwardRef<HTMLDivElement, TodoCardProps>(({dragStart, dragEnd,
             ref={ref}
             data-id={item.id}
             onDragStart={() => dragStart(item.id)}
-            onDragEnd={(e: React.DragEvent<HTMLDivElement>) => dragEnd(e)}
+            onDragEnd={() => dragEnd()}
             className={`flex gap-4 w-[calc(50%-0.5rem)] px-4 py-6 ${color} rounded-lg shadow-md cursor-pointer`}
             onClick={todoListCardClick} 
             draggable
@@ -83,5 +83,6 @@ const TodoCard = forwardRef<HTMLDivElement, TodoCardProps>(({dragStart, dragEnd,
     );
 });
 
+TodoCard.displayName = "TodoCard";
 
 export { TodoCard };

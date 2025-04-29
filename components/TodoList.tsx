@@ -147,7 +147,7 @@ export function TodoList() {
     }
 
     // 드래그가 끝났을 때 호출되는 함수
-    const dragEnd = async (e: React.DragEvent<HTMLDivElement>) => {        
+    const dragEnd = async () => {        
         selectedItem.current = -1; // todo(div 태그)에 대한 값을 초기화
         selectedCategory.current = -1; // 카테고리(li 태그)에 대한 값을 초기화
         setDragOff();
