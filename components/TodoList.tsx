@@ -28,8 +28,8 @@ export function TodoList() {
     const handlePageChange = (page: number) => {
         setPage(page);
 
-        let start = (page - 1) * limit;
-        let end = page * limit;
+        const start = (page - 1) * limit;
+        const end = page * limit;
 
         // 각 카테고리의 todoList 중 현재 페이지에 해당하는 todoList 데이터를 저장
         if (list.length > 0) {
@@ -106,7 +106,7 @@ export function TodoList() {
     const selectedCategory = useRef<number>(-1);
     
     // todo(div 태그)가 드래그를 시작할 때 호출되는 함수
-    const dragStart = (e: React.DragEvent<HTMLDivElement>, idx: number) => {
+    const dragStart = (idx: number) => {
         setDragOn();
         selectedItem.current = idx; // selectedItem에 현재 드래그 중인 todo의 id를 저장
     }
@@ -133,7 +133,7 @@ export function TodoList() {
     };
 
     // 드래그된 항목이 드랍될 때 호출되는 함수
-    const dragDrop = async (e: any) => {
+    const dragDrop = async (e: React.DragEvent<HTMLLIElement>) => {
         e.preventDefault();
 
         // selectedItem과 selectedCategory가 유효한 값일 경우

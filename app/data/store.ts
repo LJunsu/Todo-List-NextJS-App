@@ -57,7 +57,7 @@ export async function completedItem(indexs: number[]): Promise<void> {
     const items = await getItems();
     // 사용자가 선택한 todo의 id 배열(indexs)을 순회하며 해당 id의 todo를 items 배열에서 찾아 completed 값을 반전
     indexs.map((id) => {
-        let newIndex = items.find(item => item.id === id); // items 배열에서 id와 동일한 id를 가지고 있는 item을 반환
+        const newIndex = items.find(item => item.id === id); // items 배열에서 id와 동일한 id를 가지고 있는 item을 반환
         if(newIndex) newIndex.completed = !newIndex.completed;
     });
     await fs.writeFile(dbPath, JSON.stringify(items, null, 2));
@@ -74,7 +74,7 @@ export async function removeItem(indexs: number[]): Promise<void> {
 export async function toActiveItem(indexs: number[]): Promise<void> {
     const items = await getItems();
     indexs.map((id) => {
-        let newIndex = items.find(item => item.id === id);
+        const newIndex = items.find(item => item.id === id);
         if(newIndex) newIndex.completed = false;
     });
     await fs.writeFile(dbPath, JSON.stringify(items, null, 2));
@@ -83,7 +83,7 @@ export async function toActiveItem(indexs: number[]): Promise<void> {
 export async function toCompletedItem(indexs: number[]): Promise<void> {
     const items = await getItems();
     indexs.map((id) => {
-        let newIndex = items.find(item => item.id === id);
+        const newIndex = items.find(item => item.id === id);
         if(newIndex) newIndex.completed = true;
     });
     await fs.writeFile(dbPath, JSON.stringify(items, null, 2));

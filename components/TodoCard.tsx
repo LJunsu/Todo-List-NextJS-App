@@ -1,7 +1,6 @@
 "use client";
 
 import { TodoType } from "@/app/data/store";
-import { useDragStore } from "@/store/dragStore";
 import { forwardRef, useEffect, useRef } from "react";
 
 const getColor = (color: number) => {
@@ -20,7 +19,7 @@ const getColor = (color: number) => {
 };
 
 type TodoCardProps = {
-    dragStart: (e: React.DragEvent<HTMLDivElement>, id: number) => void;
+    dragStart: (id: number) => void;
     dragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
     item: TodoType;
     index: number;
@@ -44,7 +43,6 @@ type TodoCardProps = {
     ref가 props 이후에 전달되는 이유는 props가 자식 요소 데이터이고, ref는 DOM 참조를 다루기 때문
 */
 const TodoCard = forwardRef<HTMLDivElement, TodoCardProps>(({dragStart, dragEnd, item, index, onToggle}, ref) => {
-    const {isDragOn} = useDragStore();
     const color = getColor(index);
 
     const todoListCardRef = useRef<HTMLInputElement>(null);
@@ -66,7 +64,7 @@ const TodoCard = forwardRef<HTMLDivElement, TodoCardProps>(({dragStart, dragEnd,
         <div 
             ref={ref}
             data-id={item.id}
-            onDragStart={(e: React.DragEvent<HTMLDivElement>) => dragStart(e, item.id)}
+            onDragStart={() => dragStart(item.id)}
             onDragEnd={(e: React.DragEvent<HTMLDivElement>) => dragEnd(e)}
             className={`flex gap-4 w-[calc(50%-0.5rem)] px-4 py-6 ${color} rounded-lg shadow-md cursor-pointer`}
             onClick={todoListCardClick} 
