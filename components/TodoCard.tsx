@@ -77,7 +77,7 @@ const TodoCard = forwardRef<HTMLDivElement, TodoCardProps>(({dragStart, dragEnd,
                 onToggle();
             }} />
 
-            <div className="flex justify-between w-full">
+            <div className="flex justify-between w-full items-center">
                 <div>{item.content}</div>
                 {item.completed && <div>✔</div>}
             </div>
